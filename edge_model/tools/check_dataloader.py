@@ -17,7 +17,7 @@ from edge_model.core.config import load_config
 from edge_model.data.build import make_dataset, make_loader
 
 DEFAULT_ARGS = {
-    "config": Path("edge_model/configs/local_3070ti.yaml"),
+    "config": PROJECT_ROOT / "edge_model" / "configs" / "local_3070ti.yaml",
 }
 
 
@@ -30,7 +30,8 @@ def parse_args() -> argparse.Namespace:
 
 def main(args: argparse.Namespace) -> None:
     """Load one training batch and print tensor shapes."""
-    config = load_config(args.config)
+    config_path = args.config if args.config.is_absolute() else PROJECT_ROOT / args.config
+    config = load_config(config_path)
     config["paths"]["project_root"] = str(PROJECT_ROOT)
     dataset_cfg = config["dataset"]
     dataset = make_dataset(

@@ -7,8 +7,10 @@ from pathlib import Path
 
 from PIL import Image
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
 DEFAULT_ARGS = {
-    "image_data_root": Path("Image_data"),
+    "image_data_root": PROJECT_ROOT / "Image_data",
 }
 
 
@@ -22,6 +24,14 @@ def parse_args() -> argparse.Namespace:
 def main(args: argparse.Namespace) -> None:
     """Print counts, formats, and sample dimensions for each dataset."""
     root = args.image_data_root
+    if not root.is_absolute():
+        root = PROJECT_ROOT / root
+    if not root.exists():
+        raise FileNotFoundError(
+            f"Cannot find image data root: {root}. "
+            "In PyCharm, either run from the project root or set --image-data-root "
+            "to D:/study/project/RBCM-Edge/Image_data."
+        )
     for dataset_dir in sorted([p for p in root.iterdir() if p.is_dir()]):
         image_dir = dataset_dir / "image"
         edge_dir = dataset_dir / "edge"

@@ -22,7 +22,7 @@ from edge_model.engine.visualize import save_gate_heatmap, save_probability_map
 from edge_model.models.build import build_model
 
 DEFAULT_ARGS = {
-    "config": Path("edge_model/configs/eval_cross_dataset.yaml"),
+    "config": PROJECT_ROOT / "edge_model" / "configs" / "eval_cross_dataset.yaml",
     "checkpoint": None,
     "image_dir": Path("Image_data/BSDS500/image"),
     "output_dir": Path("outputs/edge_detection/inference"),
@@ -45,7 +45,8 @@ def parse_args() -> argparse.Namespace:
 
 def main(args: argparse.Namespace) -> None:
     """Run inference and save probability maps plus signed gate heatmaps."""
-    config = load_config(args.config)
+    config_path = args.config if args.config.is_absolute() else PROJECT_ROOT / args.config
+    config = load_config(config_path)
     config["paths"]["project_root"] = str(PROJECT_ROOT)
     if args.checkpoint is None:
         raise SystemExit("Please provide --checkpoint or edit DEFAULT_ARGS['checkpoint'].")

@@ -23,7 +23,7 @@ from edge_model.models.build import build_model
 from rbcm_edge.models.losses import EdgeDetectionLoss
 
 DEFAULT_ARGS = {
-    "config": Path("edge_model/configs/eval_cross_dataset.yaml"),
+    "config": PROJECT_ROOT / "edge_model" / "configs" / "eval_cross_dataset.yaml",
     "checkpoint": None,
     "eval_dataset": None,
     "batch_size": None,
@@ -46,7 +46,8 @@ def parse_args() -> argparse.Namespace:
 
 def main(args: argparse.Namespace) -> None:
     """Run checkpoint evaluation and optional prediction saving."""
-    config = load_config(args.config)
+    config_path = args.config if args.config.is_absolute() else PROJECT_ROOT / args.config
+    config = load_config(config_path)
     config["paths"]["project_root"] = str(PROJECT_ROOT)
     config = deep_update(
         config,

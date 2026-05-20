@@ -35,7 +35,7 @@ from edge_model.models.build import build_model
 from rbcm_edge.models.losses import EdgeDetectionLoss
 
 DEFAULT_ARGS = {
-    "config": Path("edge_model/configs/local_3070ti.yaml"),
+    "config": PROJECT_ROOT / "edge_model" / "configs" / "local_3070ti.yaml",
     "experiment_name": None,
     "train_dataset": None,
     "val_dataset": None,
@@ -80,7 +80,8 @@ def apply_overrides(config: dict, args: argparse.Namespace) -> dict:
 
 def main(args: argparse.Namespace) -> None:
     """Run the complete training workflow."""
-    config = apply_overrides(load_config(args.config), args)
+    config_path = args.config if args.config.is_absolute() else PROJECT_ROOT / args.config
+    config = apply_overrides(load_config(config_path), args)
     config["paths"]["project_root"] = str(PROJECT_ROOT)
     seed_everything(int(config.get("seed", 42)))
 
