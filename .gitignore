@@ -1,0 +1,35 @@
+# Python cache and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Local data. MEA_data contains large Kilosort outputs and stimulus videos.
+MEA_data/
+data/
+outputs/
+checkpoints/
+logs/
+runs/
+wandb/
+
+# Model artifacts and generated figures
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.npz
+*.npy
+*.h5
+*.mat
+*.mp4
+*.avi
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

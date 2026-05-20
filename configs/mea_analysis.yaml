@@ -1,0 +1,26 @@
+project_name: RBCM-edge
+sample_rate_hz: 20000.0
+bin_ms: 10
+
+paths:
+  data_root: MEA_data
+  output_root: outputs/mea
+
+experiments:
+  "000031": double_edge
+  "000032": single_edge
+  "000033": bar
+  "000034": double_edge
+  "000035": single_edge
+  "000036": bar
+  "000037": double_edge
+  "000038": single_edge
+  "000039": bar
+
+analysis:
+  unit_label_priority: [good, mua]
+  visible_event_file: bars_only.csv
+  all_event_file: events_tidy.csv
+  default_window: stimulus
+  psth_pre_s: 0.2
+  psth_post_s: 0.8

@@ -1,0 +1,21 @@
+project_name: RBCM-edge
+model:
+  name: rbcm_fuse
+  in_channels: 3
+  feature_channels: 32
+  rbcm_reduction: 2
+  alpha_init: 0.1
+
+loss:
+  dice_weight: 1.0
+  local_weight: 0.3
+  gate_sparsity_weight: 0.0001
+
+training:
+  input_size: 384
+  batch_size: 4
+  optimizer: AdamW
+  learning_rate: 0.0001
+  weight_decay: 0.0001
+  epochs: 100
+  mixed_precision: true
