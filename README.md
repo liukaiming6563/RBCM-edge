@@ -72,9 +72,20 @@ $env:PYTHONPATH="D:\study\project\RBCM-Edge\src"
 python scripts\mea\build_response_tables.py --run-id all
 ```
 
-Smoke-test the RBCM model module:
+Smoke-check the RBCM model module:
 
 ```powershell
 $env:PYTHONPATH="D:\study\project\RBCM-Edge\src"
-python scripts\model\smoke_test_rbcm.py
+python scripts\model\run_rbcm_smoke_check.py
 ```
+
+Run normal script-style checks in PyCharm or PowerShell:
+
+```powershell
+$env:PYTHONPATH="D:\study\project\RBCM-Edge\src"
+python scripts\checks\check_mea_metrics.py
+python scripts\checks\check_rbcm_shapes.py
+```
+
+This project intentionally keeps checks under `scripts/checks/` as normal Python files, so
+PyCharm should offer normal Python run configurations for checks and scripts.

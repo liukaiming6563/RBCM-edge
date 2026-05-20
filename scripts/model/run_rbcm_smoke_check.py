@@ -1,4 +1,4 @@
-"""Smoke-test the RBCM-Fuse model skeleton."""
+"""Smoke-check the RBCM-Fuse model skeleton."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ def main(args: argparse.Namespace) -> None:
     x = torch.randn(args.batch_size, 3, args.height, args.width)
     with torch.no_grad():
         out = model(x)
-    print("Smoke test passed")
+    print("Smoke check passed")
     for key, value in out.items():
         print(f"  {key:15s}: {tuple(value.shape)}")
     print(f"  gate range: [{out['gate'].min().item():.3f}, {out['gate'].max().item():.3f}]")
