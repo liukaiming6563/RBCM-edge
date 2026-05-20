@@ -103,6 +103,7 @@ $env:PYTHONPATH="D:\study\project\RBCM-Edge\src"
 python edge_model\tools\inspect_edge_data.py
 python edge_model\tools\check_dataloader.py
 python edge_model\train.py --config edge_model\configs\local_3070ti.yaml --epochs 2 --batch-size 2
+python edge_model\tools\analyze_training_log.py
 ```
 
 Generated checkpoints, logs, metrics, predictions, gate heatmaps, and visual
