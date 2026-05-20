@@ -10,7 +10,7 @@ venv/
 # Local data. MEA_data contains large Kilosort outputs and stimulus videos.
 MEA_data/
 Image_data/
-data/
+/data/
 outputs/
 checkpoints/
 logs/

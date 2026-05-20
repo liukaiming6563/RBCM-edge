@@ -89,3 +89,25 @@ python scripts\checks\check_rbcm_shapes.py
 
 This project intentionally keeps checks under `scripts/checks/` as normal Python files, so
 PyCharm should offer normal Python run configurations for checks and scripts.
+
+## Edge Model Pipeline
+
+The edge detection training pipeline lives under `edge_model/`. It contains
+dataset loading, transforms, training, evaluation, inference, metrics, prediction
+visualization, and gate heatmap saving.
+
+For local 3070Ti debugging, start with:
+
+```powershell
+$env:PYTHONPATH="D:\study\project\RBCM-Edge\src"
+python edge_model\tools\inspect_edge_data.py
+python edge_model\tools\check_dataloader.py
+python edge_model\train.py --config edge_model\configs\local_3070ti.yaml --epochs 2 --batch-size 2
+```
+
+Generated checkpoints, logs, metrics, predictions, gate heatmaps, and visual
+comparisons are saved under:
+
+```text
+outputs/edge_detection/<experiment_name>/
+```

@@ -1,0 +1,46 @@
+experiment_name: server_rbcm_fuse_full
+seed: 42
+device: cuda
+
+paths:
+  project_root: .
+  image_data_root: Image_data
+  output_root: outputs/edge_detection
+
+dataset:
+  train_dataset: BIPED
+  val_dataset: BSDS500
+  train_split: train
+  val_split: all
+  val_fraction: 0.15
+  input_size: 512
+  random_crop: true
+  horizontal_flip: true
+  vertical_flip: false
+
+loader:
+  batch_size: 12
+  num_workers: 8
+  pin_memory: true
+
+model:
+  name: rbcm_fuse
+  in_channels: 3
+  feature_channels: 48
+  rbcm_reduction: 2
+  alpha_init: 0.1
+
+loss:
+  dice_weight: 1.0
+  local_weight: 0.3
+  gate_sparsity_weight: 0.0001
+
+train:
+  epochs: 120
+  learning_rate: 0.0001
+  weight_decay: 0.0001
+  mixed_precision: true
+  log_interval: 20
+  eval_interval: 1
+  save_visual_interval: 5
+  max_visual_samples: 16
