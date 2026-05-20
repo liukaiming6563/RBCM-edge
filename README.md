@@ -112,3 +112,10 @@ comparisons are saved under:
 ```text
 outputs/edge_detection/<experiment_name>/
 ```
+
+When `train.auto_plot_log: true` is enabled, training automatically saves loss
+and ODS/OIS/AP trend plots under:
+
+```text
+outputs/edge_detection/<experiment_name>/plots/
+```

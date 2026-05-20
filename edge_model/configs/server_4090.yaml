@@ -44,3 +44,4 @@ train:
   eval_interval: 1
   save_visual_interval: 5
   max_visual_samples: 16
+  auto_plot_log: true

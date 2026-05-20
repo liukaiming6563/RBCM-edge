@@ -32,6 +32,7 @@ from edge_model.core.seed import seed_everything
 from edge_model.data.build import make_dataset, make_loader
 from edge_model.engine.train_loop import append_metrics_csv, evaluate, train_one_epoch
 from edge_model.models.build import build_model
+from edge_model.tools.analyze_training_log import analyze_training_log
 from rbcm_edge.models.losses import EdgeDetectionLoss
 
 DEFAULT_ARGS = {
@@ -171,6 +172,12 @@ def main(args: argparse.Namespace) -> None:
                 best_ods = val_metrics["ODS"]
                 torch.save(checkpoint, run_paths.checkpoints / "best.pt")
                 print(f"Saved best checkpoint with ODS={best_ods:.4f}")
+
+    if bool(config["train"].get("auto_plot_log", True)):
+        log_csv = run_paths.logs / "train_log.csv"
+        plot_dir = run_paths.root / "plots"
+        print(f"Generating training trend plots from {log_csv}")
+        analyze_training_log(log_csv=log_csv, output_dir=plot_dir)
 
 
 if __name__ == "__main__":

@@ -34,6 +34,13 @@ The `outputs/` folder is ignored by git. Keep generated predictions,
 checkpoints, and visualizations local or copy them manually when preparing paper
 figures.
 
+When `train.auto_plot_log: true` is enabled in the config, `train.py`
+automatically creates loss and metric trend plots at the end of training:
+
+```text
+outputs/edge_detection/<experiment_name>/plots/
+```
+
 ## Script Style
 
 Each runnable file has a `DEFAULT_ARGS` dictionary near the top. In PyCharm you

@@ -54,17 +54,40 @@ def parse_args() -> argparse.Namespace:
 def main(args: argparse.Namespace) -> None:
     """Load the training CSV and save trend plots."""
     log_csv = args.log_csv if args.log_csv.is_absolute() else PROJECT_ROOT / args.log_csv
+    output_dir = args.output_dir
+    if output_dir is not None and not output_dir.is_absolute():
+        output_dir = PROJECT_ROOT / output_dir
+
+    analyze_training_log(log_csv=log_csv, output_dir=output_dir)
+
+    if args.show:
+        plt.show()
+    else:
+        plt.close("all")
+
+
+def analyze_training_log(log_csv: str | Path, output_dir: str | Path | None = None) -> dict[str, Path]:
+    """Read a train_log.csv file and save all training trend plots.
+
+    Args:
+        log_csv: Path to the CSV written by `edge_model/train.py`.
+        output_dir: Optional plot output directory. When omitted, plots are saved
+            under `<experiment_root>/plots`.
+
+    Returns:
+        Mapping from plot name to saved file path. This return value is useful
+        when `train.py` calls the function automatically after training.
+    """
+    log_csv = Path(log_csv)
     if not log_csv.exists():
         raise FileNotFoundError(
             f"Cannot find training log: {log_csv}. "
             "Run training first or set DEFAULT_ARGS['log_csv'] to your train_log.csv."
         )
 
-    output_dir = args.output_dir
     if output_dir is None:
         output_dir = log_csv.parents[1] / "plots"
-    elif not output_dir.is_absolute():
-        output_dir = PROJECT_ROOT / output_dir
+    output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     log = pd.read_csv(log_csv)
@@ -74,14 +97,15 @@ def main(args: argparse.Namespace) -> None:
     print(f"Loaded {len(log)} rows from {log_csv}")
     print(f"Saving plots to {output_dir}")
 
-    plot_loss_curves(log, output_dir / "loss_curves.png")
-    plot_metric_curves(log, output_dir / "validation_metrics.png", metrics=["ODS", "OIS", "AP"])
-    plot_summary_panel(log, output_dir / "training_summary.png")
-
-    if args.show:
-        plt.show()
-    else:
-        plt.close("all")
+    saved_paths = {
+        "loss_curves": output_dir / "loss_curves.png",
+        "validation_metrics": output_dir / "validation_metrics.png",
+        "training_summary": output_dir / "training_summary.png",
+    }
+    plot_loss_curves(log, saved_paths["loss_curves"])
+    plot_metric_curves(log, saved_paths["validation_metrics"], metrics=["ODS", "OIS", "AP"])
+    plot_summary_panel(log, saved_paths["training_summary"])
+    return saved_paths
 
 
 def plot_loss_curves(log: pd.DataFrame, output_path: Path) -> None:
