@@ -1,0 +1,38 @@
+project_name: RBCM-edge
+
+paths:
+  image_data_root: Image_data
+
+datasets:
+  BIPED:
+    image_dir: Image_data/BIPED/image
+    edge_dir: Image_data/BIPED/edge
+    overlapping_dir: Image_data/BIPED/overlapping
+    image_ext: .jpg
+    edge_ext: .png
+    count: 250
+    role: train_or_test
+  BSDS500:
+    image_dir: Image_data/BSDS500/image
+    edge_dir: Image_data/BSDS500/edge
+    overlapping_dir: Image_data/BSDS500/overlapping
+    image_ext: .jpg
+    edge_ext: .png
+    count: 500
+    role: train_or_test
+  NYUDv2:
+    image_dir: Image_data/NYUDv2/image
+    edge_dir: Image_data/NYUDv2/edge
+    overlapping_dir: Image_data/NYUDv2/overlapping
+    image_ext: .jpg
+    edge_ext: .png
+    count: 1449
+    role: cross_dataset_test
+  Multicue:
+    image_dir: Image_data/Multicue/image
+    edge_dir: Image_data/Multicue/edge
+    overlapping_dir: Image_data/Multicue/overlapping
+    image_ext: .png
+    edge_ext: .png
+    count: 100
+    role: optional_generalization_test
