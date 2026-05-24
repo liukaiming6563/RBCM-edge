@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
+from typing import Iterable
 
 import torch
 from torch import nn
@@ -16,6 +17,22 @@ from edge_model.engine.visualize import (
     save_probability_map,
     save_triplet_visualization,
 )
+
+METRIC_FIELD_ORDER = [
+    "epoch",
+    "split",
+    "total",
+    "final_bce",
+    "final_dice",
+    "local",
+    "gate_sparsity",
+    "ODS",
+    "OIS",
+    "AP",
+    "loss",
+    "checkpoint",
+    "dataset",
+]
 
 
 def train_one_epoch(
@@ -128,12 +145,40 @@ def evaluate(
 
 
 def append_metrics_csv(path: str | Path, row: dict) -> None:
-    """Append one metrics row to CSV, writing the header when needed."""
+    """Append one metrics row while keeping a stable CSV schema.
+
+    Training rows contain loss components such as `total` and `final_bce`,
+    while validation rows contain edge metrics such as `ODS`, `OIS`, `AP`, and
+    `loss`. The first implementation wrote each row with its own field order,
+    which made validation values land under the training-loss columns. This
+    helper keeps one union header for the whole file and expands that header if
+    new columns appear in later rows.
+    """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    exists = path.exists()
-    with path.open("a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(row.keys()))
-        if not exists:
-            writer.writeheader()
-        writer.writerow(row)
+
+    existing_rows: list[dict[str, str]] = []
+    existing_fields: list[str] = []
+    if path.exists() and path.stat().st_size > 0:
+        with path.open("r", newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            existing_fields = list(reader.fieldnames or [])
+            existing_rows = list(reader)
+
+    fieldnames = _merge_metric_fields(existing_fields, row.keys())
+    rows_to_write = existing_rows + [row]
+
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows_to_write)
+
+
+def _merge_metric_fields(existing_fields: list[str], new_fields: Iterable[str]) -> list[str]:
+    """Return a deterministic union of existing and new CSV columns."""
+    merged: list[str] = []
+    all_fields = list(existing_fields) + list(new_fields)
+    for field in METRIC_FIELD_ORDER + all_fields:
+        if field in all_fields and field not in merged:
+            merged.append(field)
+    return merged

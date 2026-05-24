@@ -93,6 +93,7 @@ def analyze_training_log(log_csv: str | Path, output_dir: str | Path | None = No
     log = pd.read_csv(log_csv)
     if "epoch" not in log.columns or "split" not in log.columns:
         raise ValueError("train_log.csv must contain at least 'epoch' and 'split' columns.")
+    log = normalize_training_log(log)
 
     print(f"Loaded {len(log)} rows from {log_csv}")
     print(f"Saving plots to {output_dir}")
@@ -112,11 +113,10 @@ def plot_loss_curves(log: pd.DataFrame, output_path: Path) -> None:
     """Plot train and validation loss curves."""
     fig, ax = plt.subplots(figsize=(7, 4), dpi=150)
     for split, part in log.groupby("split"):
-        if "total" in part.columns:
-            value_col = "total"
-        elif "loss" in part.columns:
-            value_col = "loss"
-        else:
+        split_name = str(split).lower()
+        candidates = ["loss", "total"] if split_name == "val" else ["total", "loss"]
+        value_col = _first_present_numeric_column(part, candidates)
+        if value_col is None:
             continue
         ax.plot(part["epoch"], part[value_col], marker="o", linewidth=1.8, label=f"{split} {value_col}")
 
@@ -136,7 +136,7 @@ def plot_metric_curves(log: pd.DataFrame, output_path: Path, metrics: list[str])
     fig, ax = plt.subplots(figsize=(7, 4), dpi=150)
     plotted = False
     for metric in metrics:
-        if metric in val.columns:
+        if _has_numeric_values(val, metric):
             ax.plot(val["epoch"], val[metric], marker="o", linewidth=1.8, label=metric)
             plotted = True
 
@@ -178,7 +178,7 @@ def plot_summary_panel(log: pd.DataFrame, output_path: Path) -> None:
 def _plot_column(ax, data: pd.DataFrame, x_col: str, y_col: str, title: str) -> None:
     """Plot one column if it exists; otherwise show a placeholder."""
     ax.set_title(title)
-    if data.empty or y_col not in data.columns:
+    if data.empty or not _has_numeric_values(data, y_col):
         ax.text(0.5, 0.5, f"Missing {y_col}", ha="center", va="center")
         return
     ax.plot(data[x_col], data[y_col], marker="o", linewidth=1.8)
@@ -189,13 +189,54 @@ def _plot_multiple_columns(ax, data: pd.DataFrame, x_col: str, y_cols: list[str]
     ax.set_title(title)
     plotted = False
     for y_col in y_cols:
-        if y_col in data.columns:
+        if _has_numeric_values(data, y_col):
             ax.plot(data[x_col], data[y_col], marker="o", linewidth=1.8, label=y_col)
             plotted = True
     if plotted:
         ax.legend()
     else:
         ax.text(0.5, 0.5, "Missing metrics", ha="center", va="center")
+
+
+def normalize_training_log(log: pd.DataFrame) -> pd.DataFrame:
+    """Normalize current and legacy train_log.csv schemas for plotting.
+
+    New logs contain both training loss columns and validation metric columns.
+    A legacy writer bug saved validation rows using the training-loss header:
+    `total=ODS`, `final_bce=OIS`, `final_dice=AP`, and `local=loss`.
+    This function detects that layout and reconstructs the intended columns for
+    analysis without modifying the original CSV on disk.
+    """
+    log = log.copy()
+    metric_cols = ["ODS", "OIS", "AP", "loss"]
+    for col in ["total", "final_bce", "final_dice", "local", "gate_sparsity", *metric_cols]:
+        if col in log.columns:
+            log[col] = pd.to_numeric(log[col], errors="coerce")
+
+    val_mask = log["split"].astype(str).str.lower().eq("val")
+    has_metric_cols = any(col in log.columns and log.loc[val_mask, col].notna().any() for col in metric_cols)
+    legacy_cols = {"total", "final_bce", "final_dice", "local"}.issubset(log.columns)
+    if val_mask.any() and not has_metric_cols and legacy_cols:
+        log.loc[val_mask, "ODS"] = log.loc[val_mask, "total"]
+        log.loc[val_mask, "OIS"] = log.loc[val_mask, "final_bce"]
+        log.loc[val_mask, "AP"] = log.loc[val_mask, "final_dice"]
+        log.loc[val_mask, "loss"] = log.loc[val_mask, "local"]
+        log.loc[val_mask, ["total", "final_bce", "final_dice", "local"]] = pd.NA
+
+    return log
+
+
+def _first_present_numeric_column(data: pd.DataFrame, columns: list[str]) -> str | None:
+    """Return the first candidate column containing at least one numeric value."""
+    for column in columns:
+        if _has_numeric_values(data, column):
+            return column
+    return None
+
+
+def _has_numeric_values(data: pd.DataFrame, column: str) -> bool:
+    """Check whether a column exists and has at least one non-null value."""
+    return column in data.columns and pd.to_numeric(data[column], errors="coerce").notna().any()
 
 
 if __name__ == "__main__":
