@@ -34,3 +34,9 @@ wandb/
 Thumbs.db
 .idea/
 .vscode/
+
+# Local backups not intended for GitHub
+docs/±¸·Ý/
+docs/*/MEA_analysis_final/
+docs/*/MEA_analysis_final/**
+docs/*/**
